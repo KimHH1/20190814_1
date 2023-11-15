@@ -1670,3 +1670,4 @@ void CMFCApplication20190814View::OnGeometryVerticalFup() //상하대칭
 }
 //p가 i q가 i+1
 //워핑 한장의 영상을 우리가 원하는 방향으로 움직임
+//dd
