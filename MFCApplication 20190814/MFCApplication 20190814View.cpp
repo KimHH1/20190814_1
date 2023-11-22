@@ -57,14 +57,15 @@ BEGIN_MESSAGE_MAP(CMFCApplication20190814View, CScrollView)
 	ON_COMMAND(ID_GEOBETRY_WARPING, &CMFCApplication20190814View::OnGeobetryWarping)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_COMMAND(ID_GEOMETRY_MORPHING, &CMFCApplication20190814View::OnGeometryMorphing)
+	ON_COMMAND(ID_AVI_VIEW, &CMFCApplication20190814View::OnAviView)
 END_MESSAGE_MAP()
 
 // CMFCApplication20190814View 생성/소멸
 
 CMFCApplication20190814View::CMFCApplication20190814View() noexcept
 {
-	// TODO: 여기에 생성 코드를 추가합니다.
-
+	bAviMode = false;
 }
 
 CMFCApplication20190814View::~CMFCApplication20190814View()
@@ -87,6 +88,14 @@ void CMFCApplication20190814View::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
+
+	if (bAviMode)
+	{
+		//재생
+		LoadAviFile(pDC);
+		bAviMode = false;
+		return;
+	}
 
 	// TODO: 여기에 원시 데이터에 대한 그리기 코드를 추가합니다.
 	int x, y;
@@ -1673,7 +1682,6 @@ void CMFCApplication20190814View::OnGeometryVerticalFup() //상하대칭
 }
 //p가 i q가 i+1
 //워핑 한장의 영상을 우리가 원하는 방향으로 움직임
-//11주차
 
 typedef struct
 {
@@ -1831,4 +1839,30 @@ void CMFCApplication20190814View::OnLButtonUp(UINT nFlags, CPoint point)
 	mctrl_dest.Qy = mpos_end.y;
 
 	CScrollView::OnLButtonUp(nFlags, point);
+}
+
+
+void CMFCApplication20190814View::OnGeometryMorphing()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+}
+
+
+void CMFCApplication20190814View::OnAviView()
+{
+	CFileDialog dlg(true, "", "", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		"Avi화일(*.avi)|*.avi|모든화일|*.*|");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		AviFileName = dlg.GetPathName();
+		bAviMode = true;
+		Invalidate();
+	}
+}
+
+
+void CMFCApplication20190814View::LoadAviFile(CDC* pDC)
+{
+	// TODO: 여기에 구현 코드 추가.
 }
