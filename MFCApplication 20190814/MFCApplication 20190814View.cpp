@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CMFCApplication20190814View, CScrollView)
 	ON_COMMAND(ID_GEOMETRY_ROTATION, &CMFCApplication20190814View::OnGeometryRotation)
 	ON_COMMAND(ID_GEOMETRY_HOLIZANTIAL_FUP, &CMFCApplication20190814View::OnGeometryHolizantialFup)
 	ON_COMMAND(ID_GEOMETRY_VERTICAL_FUP, &CMFCApplication20190814View::OnGeometryVerticalFup)
+	ON_COMMAND(ID_GEOBETRY_WARPING, &CMFCApplication20190814View::OnGeobetryWarping)
 END_MESSAGE_MAP()
 
 // CMFCApplication20190814View 생성/소멸
@@ -1671,3 +1672,101 @@ void CMFCApplication20190814View::OnGeometryVerticalFup() //상하대칭
 //p가 i q가 i+1
 //워핑 한장의 영상을 우리가 원하는 방향으로 움직임
 //11주차
+
+typedef struct
+{
+	int Px;
+	int Py;
+	int Qx;
+	int Qy;
+}control_line;
+
+void CMFCApplication20190814View::OnGeobetryWarping()
+{
+	CMFCApplication20190814Doc* pDoc = GetDocument();
+
+	control_line source_lines[5] = { {100,100,150,150},
+	{0,0,pDoc->ImageWidth-1,0},{pDoc->ImageWidth-1,0,pDoc->ImageWidth-1,pDoc->ImageHeight-1},
+	{pDoc->ImageWidth - 1,pDoc->ImageHeight - 1,0,pDoc->ImageHeight - 1},{0,pDoc->ImageHeight-1,0,0}};
+	control_line dest_lines[5] = { {100,100,200,200},
+	{0,0,pDoc->ImageWidth - 1,0},{pDoc->ImageWidth - 1,0,pDoc->ImageWidth - 1,pDoc->ImageHeight - 1},
+	{pDoc->ImageWidth - 1,pDoc->ImageHeight - 1,0,pDoc->ImageHeight - 1},{0,pDoc->ImageHeight - 1,0,0} };
+
+	int x, y;
+
+	double u;	//수직 교차점의 위치
+	double h;	//제어선으로부터 픽셀의 수직 변위
+	double d;	//제어선과 픽셀 사이의 거리
+	double tx, ty;	//결과영상 픽셀에 대응되는 입력 영상 픽셀 사이의 변위의 합
+	double xp, yp;	//각 제어선에 대해 계산된 입력 영상의 대응되는 픽셀 위치
+	double weight;	//각 제어선의 가중치
+	double totalweight;	//가중치의 합
+	double a = 0.001;
+	double b = 2.0;
+	double p = 0.75;
+
+	int x1, y1, x2, y2;
+	int src_x1, src_y1, src_x2, src_y2; //변화하기 전 좌표값 저장
+	double src_line_length, dest_line_length;
+
+	int num_lines = 5; //제어선의 개수
+	int line;
+	int source_x, source_y;
+	int last_row, last_col;
+
+	last_col = pDoc->ImageWidth - 1;
+	last_row = pDoc->ImageHeight - 1;
+
+	for (y = 0; y < pDoc->ImageHeight; y++)
+		for (x = 0; x < pDoc->ImageWidth; x++)
+		{
+			tx = 0.0;
+			ty = 0.0;
+			totalweight = 0.0;
+			for (line = 0; line < num_lines; line++)
+			{
+				x1 = dest_lines[line].Px;
+				y1 = dest_lines[line].Py;
+				x2 = dest_lines[line].Qx;
+				y2 = dest_lines[line].Qy;
+
+				dest_line_length = sqrt((double)(x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));	//두 점사이의 거리
+				
+				u = (double)((x - x1)*(x2 - x1) + (y - y1)*(y2 - y1))/
+					(double)((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+
+				h = (double)((y - y1)*(x2 - x1) - (x - x1)*(y2 - y1))/dest_line_length;
+
+				if (u < 0)		d = sqrt((double)(x - x1)*(x - x1) + (y - y1)*(y - y1));
+				else if(u>1)	d = sqrt((double)(x - x2)*(x - x2) + (y - y2)*(y - y2));
+				else			d = fabs(h); //fabs 절대값으로 바꿔줌
+				
+				src_x1 = source_lines[line].Px;
+				src_y1 = source_lines[line].Py;
+				src_x2 = source_lines[line].Qx;
+				src_y2 = source_lines[line].Qy;
+
+				src_line_length = sqrt((double)(src_x2 - src_x1)*(src_x2 - src_x1) + (src_y2 - src_y1)*(src_y2 - src_y1));
+
+				xp = src_x1 + u * (src_x2 - src_x1) - h * (src_y2 - src_y1) / src_line_length;
+				yp = src_y1 + u * (src_y2 - src_y1) + h * (src_x2 - src_x1) / src_line_length;
+
+				weight = pow((pow(dest_line_length,p)/(a + d)), b);
+
+				tx += (xp - x)*weight;
+				ty += (yp - y)*weight;
+				totalweight += weight;
+			}
+
+			source_x = x + (int)(tx / totalweight);
+			source_y = y + (int)(ty / totalweight);
+
+			if (source_x < 0)	source_x = 0;
+			if (source_x > last_col)	source_x = last_col;
+			if (source_y < 0)	source_y = 0;
+			if (source_y > last_row)	source_y = last_row;
+
+			pDoc->ResultImg[y][x] = pDoc->InPutImg[source_y][source_x];
+		}
+	Invalidate();
+}

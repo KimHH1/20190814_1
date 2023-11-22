@@ -73,6 +73,7 @@ public:
 	afx_msg void OnGeometryRotation();
 	afx_msg void OnGeometryHolizantialFup();
 	afx_msg void OnGeometryVerticalFup();
+	afx_msg void OnGeobetryWarping();
 };
 
 #ifndef _DEBUG  // MFCApplication 20190814View.cpp의 디버그 버전

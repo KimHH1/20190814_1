@@ -78,13 +78,15 @@
 #define ID_GEOMETRY_HOLIZANTIAL_FUP     32836
 #define ID_32837                        32837
 #define ID_GEOMETRY_VERTICAL_FUP        32838
+#define ID_32839                        32839
+#define ID_GEOBETRY_WARPING             32840
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
-#define _APS_NEXT_COMMAND_VALUE         32839
+#define _APS_NEXT_COMMAND_VALUE         32841
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           310
 #endif
