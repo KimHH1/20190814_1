@@ -55,6 +55,8 @@ BEGIN_MESSAGE_MAP(CMFCApplication20190814View, CScrollView)
 	ON_COMMAND(ID_GEOMETRY_HOLIZANTIAL_FUP, &CMFCApplication20190814View::OnGeometryHolizantialFup)
 	ON_COMMAND(ID_GEOMETRY_VERTICAL_FUP, &CMFCApplication20190814View::OnGeometryVerticalFup)
 	ON_COMMAND(ID_GEOBETRY_WARPING, &CMFCApplication20190814View::OnGeobetryWarping)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 // CMFCApplication20190814View 생성/소멸
@@ -1681,7 +1683,10 @@ typedef struct
 	int Qy;
 }control_line;
 
-void CMFCApplication20190814View::OnGeobetryWarping()
+control_line mctrl_source = { 100,100,150,150};
+control_line mctrl_dest = { 100,100,200,200 };
+
+void CMFCApplication20190814View::OnGeobetryWarping() //워핑
 {
 	CMFCApplication20190814Doc* pDoc = GetDocument();
 
@@ -1691,6 +1696,9 @@ void CMFCApplication20190814View::OnGeobetryWarping()
 	control_line dest_lines[5] = { {100,100,200,200},
 	{0,0,pDoc->ImageWidth - 1,0},{pDoc->ImageWidth - 1,0,pDoc->ImageWidth - 1,pDoc->ImageHeight - 1},
 	{pDoc->ImageWidth - 1,pDoc->ImageHeight - 1,0,pDoc->ImageHeight - 1},{0,pDoc->ImageHeight - 1,0,0} };
+
+	source_lines[0] = mctrl_source;
+	dest_lines[0] = mctrl_dest;
 
 	int x, y;
 
@@ -1757,7 +1765,7 @@ void CMFCApplication20190814View::OnGeobetryWarping()
 				ty += (yp - y)*weight;
 				totalweight += weight;
 			}
-
+			
 			source_x = x + (int)(tx / totalweight);
 			source_y = y + (int)(ty / totalweight);
 
@@ -1766,7 +1774,61 @@ void CMFCApplication20190814View::OnGeobetryWarping()
 			if (source_y < 0)	source_y = 0;
 			if (source_y > last_row)	source_y = last_row;
 
-			pDoc->ResultImg[y][x] = pDoc->InPutImg[source_y][source_x];
+			if(pDoc->depth==1)
+				pDoc->ResultImg[y][x] = pDoc->InPutImg[source_y][source_x];
+			else
+			{
+				pDoc->ResultImg[y][3 * x + 0] = pDoc->InPutImg[source_y][3 * source_x + 0];
+				pDoc->ResultImg[y][3 * x + 1] = pDoc->InPutImg[source_y][3 * source_x + 1];
+				pDoc->ResultImg[y][3 * x + 2] = pDoc->InPutImg[source_y][3 * source_x + 2];
+			}
 		}
 	Invalidate();
+}
+
+
+CPoint mpos_st, mpos_end;
+
+void CMFCApplication20190814View::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	mpos_st = point;
+
+	CScrollView::OnLButtonDown(nFlags, point);
+}
+
+
+void CMFCApplication20190814View::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	mpos_end = point;
+
+	CDC *pDC = GetDC();
+	CPen rpen;
+	rpen.CreatePen(PS_SOLID, 0, RGB(255, 0, 0)); //선에 색을 넣는 부분
+	pDC->SelectObject(&rpen);
+	
+	pDC->MoveTo(mpos_st);	
+	pDC->LineTo(mpos_end);
+	ReleaseDC(pDC);
+
+	int Ax, Ay, Bx, By;
+	Ax = mpos_st.x;
+	Ay = mpos_st.y;
+	Bx = mpos_end.x;
+	By = mpos_end.y;
+
+	if (Ax < Bx)	mctrl_source.Px = Ax - (Bx - Ax) / 2;
+	else			mctrl_source.Px = Ax + (Bx - Ax) / 2;
+
+	if (Ay < By)	mctrl_source.Py = Ay - (By - Ay) / 2;
+	else			mctrl_source.Py = Ay + (By - Ay) / 2;
+
+	mctrl_dest.Px = mctrl_source.Px;
+	mctrl_dest.Py = mctrl_source.Py;
+
+	mctrl_source.Qx = mpos_st.x;
+	mctrl_source.Qy = mpos_st.y;
+	mctrl_dest.Qx = mpos_end.x;
+	mctrl_dest.Qy = mpos_end.y;
+
+	CScrollView::OnLButtonUp(nFlags, point);
 }
