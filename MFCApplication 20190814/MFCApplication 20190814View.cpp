@@ -13,6 +13,8 @@
 #include "MFCApplication 20190814Doc.h"
 #include "MFCApplication 20190814View.h"
 
+#include <vfw.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -93,6 +95,7 @@ void CMFCApplication20190814View::OnDraw(CDC* pDC)
 	{
 		//재생
 		LoadAviFile(pDC);
+		//재생 종료시 다시 리턴
 		bAviMode = false;
 		return;
 	}
@@ -1842,7 +1845,7 @@ void CMFCApplication20190814View::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CMFCApplication20190814View::OnGeometryMorphing()
+void CMFCApplication20190814View::OnGeometryMorphing() //모핑
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 }
@@ -1864,5 +1867,54 @@ void CMFCApplication20190814View::OnAviView()
 
 void CMFCApplication20190814View::LoadAviFile(CDC* pDC)
 {
-	// TODO: 여기에 구현 코드 추가.
+	PAVIFILE pavi;
+	AVIFILEINFO fi;
+	int stm;
+	PAVISTREAM pstm = NULL; //스트림 처리 포인터
+	AVISTREAMINFO si;
+	PGETFRAME pfrm = NULL;//프레임을 가져오기 위한 포인터
+	int frame;
+	LPBITMAPINFOHEADER pbmpih; 
+	unsigned char *image;
+	int x, y;
+	
+	AVIFileInit();
+	AVIFileOpen(&pavi, AviFileName, OF_READ | OF_SHARE_DENY_NONE, NULL);
+	AVIFileInfo(pavi, &fi, sizeof(AVIFILEINFO));
+
+	for (stm = 0; stm < fi.dwStreams; stm++)
+	{
+		AVIFileGetStream(pavi, &pstm, 0, stm);
+		AVIStreamInfo(pstm, &si, sizeof(si));
+		if (si.fccType == streamtypeVIDEO)
+		{
+			pfrm = AVIStreamGetFrameOpen(pstm, NULL);
+			for (frame = 0; frame < si.dwLength; frame++)
+			{
+				pbmpih = (LPBITMAPINFOHEADER)AVIStreamGetFrame(pfrm, frame);
+				if (!pbmpih) continue;	// pbmpih 못읽으면 컨티뉴
+
+				image = (unsigned char*)((LPSTR)pbmpih + (WORD)pbmpih->biSize);
+
+				/*
+				for(y=0;y<fi.dwHeight;y++)
+					for (x = 0; x < fi.dwWidth; x++)
+					{
+						pDC->SetPixel(x, fi.dwHeight - 1 - y,
+							RGB(image[3*(y*fi.dwWidth + x)+2],
+								image[3*(y*fi.dwWidth + x)+1],
+								image[3*(y*fi.dwWidth + x)+0]));
+					} dw로 하나씩 보냄 너무 오래걸림
+				*/
+				::SetDIBitsToDevice(pDC->GetSafeHdc(), 0, 0, fi.dwWidth, fi.dwHeight,
+					0, 0, 0, fi.dwWidth, image, (BITMAPINFO *)pbmpih, DIB_RGB_COLORS);
+				//너무 빨라서 속도 조정
+				Sleep(33);
+			}
+		}
+	}
+	AVIStreamGetFrameClose(pfrm);
+	AVIStreamRelease(pstm);
+	AVIFileRelease(pavi);
+	AVIFileExit();
 }
