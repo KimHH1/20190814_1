@@ -57,6 +57,7 @@ public:
 	int gImageHeight;
 
 	unsigned char **gResultImg;			//[y][x]
+	unsigned char **morphedImg[10];
 
 	void LoadImageFile(CArchive& ar);
 	void LoadSecondImageFile(CArchive & ar);

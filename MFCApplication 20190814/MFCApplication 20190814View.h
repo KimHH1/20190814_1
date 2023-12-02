@@ -81,6 +81,7 @@ public:
 	bool bAviMode;
 	CString AviFileName;
 	void LoadAviFile(CDC* pDC);
+	int viewMode;
 };
 
 #ifndef _DEBUG  // MFCApplication 20190814View.cpp의 디버그 버전
