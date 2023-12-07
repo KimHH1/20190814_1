@@ -1250,7 +1250,7 @@ void CMFCApplication20190814View::OnMopologyBinarization()//형태학적처리�
 			}
 			else
 			{
-				if ((pDoc->InPutImg[y][3 * x + 0] + pDoc->InPutImg[y][3 * x + 1] + pDoc->InPutImg[y][3 * x + 2]) / 3 > thresh)
+				if (pDoc->InPutImg[y][3 * x + 0] + pDoc->InPutImg[y][3 * x + 1] + pDoc->InPutImg[y][3 * x + 2] > thresh)
 				{
 					pDoc->InPutImg[y][3 * x + 0] = 255;
 					pDoc->InPutImg[y][3 * x + 1] = 255;
