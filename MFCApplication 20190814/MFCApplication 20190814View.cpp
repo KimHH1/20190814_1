@@ -692,34 +692,26 @@ void CMFCApplication20190814View::OnPixelTwoImageSub() //이미지 2개의 값�
 		for (x = 0; x < pDoc->ImageWidth; x++)
 		{	
 			if (pDoc->depth == 1) {
-				value = abs(0.5*pDoc->InPutImg[y][x] - 0.5*pDoc->InPutImg2[y][x]);
+				value = abs(pDoc->InPutImg[y][x] - pDoc->InPutImg2[y][x]);
 				if (value > 64) value = 255;
 				else			value = 0;
-				if (value > 255) value = 255;
-				else if (value < 0) value = 0;
 				pDoc->ResultImg[y][x] = value;
 			}
 			else
 			{
-				value = abs(0.5*pDoc->InPutImg[y][3*x+0] - 0.5*pDoc->InPutImg2[y][3 * x + 0]);
+				value = abs(pDoc->InPutImg[y][3*x+0] - pDoc->InPutImg2[y][3 * x + 0]);
 				if (value > 64) value = 255;
 				else			value = 0;
-				if (value > 255) value = 255;
-				else if (value < 0) value = 0;
 				pDoc->ResultImg[y][3 * x + 0] = value;
 
-				value = abs(0.5*pDoc->InPutImg[y][3 * x + 1] - 0.5*pDoc->InPutImg2[y][3 * x + 1]);
+				value = abs(pDoc->InPutImg[y][3 * x + 1] - pDoc->InPutImg2[y][3 * x + 1]);
 				if (value > 64) value = 255;
 				else			value = 0;
-				if (value > 255) value = 255;
-				else if (value < 0) value = 0;
 				pDoc->ResultImg[y][3 * x + 1] = value;
 
-				value = abs(0.5*pDoc->InPutImg[y][3 * x + 2] - 0.5*pDoc->InPutImg2[y][3 * x + 2]);
+				value = abs(pDoc->InPutImg[y][3 * x + 2] - pDoc->InPutImg2[y][3 * x + 2]);
 				if (value > 64) value = 255;
 				else			value = 0;
-				if (value > 255) value = 255;
-				else if (value < 0) value = 0;
 				pDoc->ResultImg[y][3 * x + 2] = value;
 			}
 		}
