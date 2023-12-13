@@ -246,7 +246,7 @@ void CMFCApplication20190814Doc::LoadImageFile(CArchive& ar)
 		//파일에서 읽어서 저장
 		BYTE nu[4*3];
 		int widthfile;
-		widthfile = (ImageWidth * 8 + 32) / 32 * 4; //비트 수 계산
+		widthfile = (ImageWidth * 8 + 31) / 32 * 4; //비트 수 계산
 		for (int j = 0; j < ImageHeight; j++)
 		{
 			if(depth==1)
@@ -359,7 +359,7 @@ void CMFCApplication20190814Doc::LoadSecondImageFile(CArchive & ar)
 		//파일에서 읽어서 저장
 		BYTE nu[4 * 3];
 		int widthfile;
-		widthfile = (ImageWidth * 8 + 32) / 32 * 4; //비트 수 계산
+		widthfile = (ImageWidth * 8 + 31) / 32 * 4; //비트 수 계산
 		for (int j = 0; j < ImageHeight; j++)
 		{
 			if (depth == 1)
