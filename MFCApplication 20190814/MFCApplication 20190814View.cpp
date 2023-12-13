@@ -693,8 +693,8 @@ void CMFCApplication20190814View::OnPixelTwoImageSub() //이미지 2개의 값�
 		{	
 			if (pDoc->depth == 1) {
 				value = abs(pDoc->InPutImg[y][x] - pDoc->InPutImg2[y][x]);
-				if (value > 125) value = 255;
-				else			value = 0;
+				/*if (value > 125) value = 255;
+				else			value = 0;*/ //뺀 값의 차이를 보임
 				pDoc->ResultImg[y][x] = value;
 			}
 			else
